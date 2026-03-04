@@ -1597,7 +1597,7 @@
         },
         "upstreamUrl": {
           "label": "Upstream URL",
-          "placeholder": "http://127.0.0.1:4000",
+          "placeholder": "http://127.0.0.1:15721",
           "description": "Proxy URL written back to client configs (http/https origin only; leave empty to use listen address/port). If you point to another port, run a forwarding/debug proxy there that forwards to this app's listen port."
         },
         "maxRetries": {

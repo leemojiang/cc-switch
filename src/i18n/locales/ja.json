@@ -1597,7 +1597,7 @@
         },
         "upstreamUrl": {
           "label": "Upstream URL",
-          "placeholder": "http://127.0.0.1:4000",
+          "placeholder": "http://127.0.0.1:15721",
           "description": "クライアント設定へ書き戻すプロキシURL（http/httpsのoriginのみ。空ならlistenアドレス/ポートを使用）。別ポートを指定する場合、そのアドレスで転送/デバッグプロキシを起動して本アプリのlistenポートへ転送してください。"
         },
         "maxRetries": {

@@ -556,7 +556,7 @@ export function ProxyPanel() {
                     placeholder={t(
                       "proxy.settings.fields.upstreamUrl.placeholder",
                       {
-                        defaultValue: "http://127.0.0.1:4000",
+                        defaultValue: "http://127.0.0.1:15721",
                       },
                     )}
                   />

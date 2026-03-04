@@ -1597,7 +1597,7 @@
         },
         "upstreamUrl": {
           "label": "Upstream URL",
-          "placeholder": "http://127.0.0.1:4000",
+          "placeholder": "http://127.0.0.1:15721",
           "description": "写回到各应用配置的代理地址（仅支持 http/https origin；留空则使用监听地址/端口）。如果指向其他端口，请在该地址上运行转发/调试代理并转发到本应用监听端口。"
         },
         "maxRetries": {
