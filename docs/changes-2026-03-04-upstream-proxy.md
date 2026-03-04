@@ -56,10 +56,13 @@
 - `ProxyService::start()` 改为使用 `db.get_proxy_config()`（旧版 ProxyConfig，包含运行时配置）
 - `GlobalProxyConfig` 继续用于 UI 全局字段与写回 upstream_url
 
-同时移除 `src-tauri/src/settings.rs` 未使用的 `std::io::Write` 导入。
+## 补充：macOS / Unix 构建修复（E0599: write_all not found）
+问题：在 `#[cfg(unix)]` 分支中调用 `file.write_all(...)`，需要 `std::io::Write` trait 在作用域内；此前移除全局 `use std::io::Write;` 后，macOS aarch64 构建会报错。
+
+修复：
+- 在 `#[cfg(unix)]` 代码块内局部 `use std::io::Write;`，仅对 Unix 生效，不影响 Windows。
 
 相关文件：
-- src-tauri/src/services/proxy.rs
 - src-tauri/src/settings.rs
 
 ## 测试 / 构建验证
