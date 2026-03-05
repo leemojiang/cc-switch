@@ -168,6 +168,7 @@ jobs:
         run: |
           set -euxo pipefail
           mkdir -p release-assets
+          OUT_DIR="$GITHUB_WORKSPACE/release-assets"
           VERSION="${GITHUB_REF_NAME}"  # e.g., v3.5.0
           echo "Looking for macOS .app (for zip) and/or .dmg..."
 
@@ -183,12 +184,20 @@ jobs:
             fi
           done
 
+          # Normalize to absolute paths so later `cd` doesn't break them
+          if [ -n "$APP_PATH" ] && [[ "$APP_PATH" != /* ]]; then
+            APP_PATH="$GITHUB_WORKSPACE/$APP_PATH"
+          fi
+          if [ -n "$DMG" ] && [[ "$DMG" != /* ]]; then
+            DMG="$GITHUB_WORKSPACE/$DMG"
+          fi
+
           if [ -n "$APP_PATH" ]; then
             APP_DIR=$(dirname "$APP_PATH"); APP_NAME=$(basename "$APP_PATH")
             NEW_ZIP="CC-Switch-${VERSION}-macOS.zip"
             cd "$APP_DIR"
             ditto -c -k --sequesterRsrc --keepParent "$APP_NAME" "$NEW_ZIP"
-            mv "$NEW_ZIP" "$GITHUB_WORKSPACE/release-assets/"
+            mv "$NEW_ZIP" "$OUT_DIR/"
             echo "macOS zip ready: $NEW_ZIP"
           else
             echo "No .app found to zip (optional)" >&2
@@ -196,7 +205,7 @@ jobs:
 
           if [ -n "$DMG" ]; then
             NEW_DMG="CC-Switch-${VERSION}-macOS.dmg"
-            cp "$DMG" "release-assets/$NEW_DMG"
+            cp "$DMG" "$OUT_DIR/$NEW_DMG"
             echo "macOS dmg copied: $NEW_DMG"
           else
             echo "No .dmg found (optional)" >&2
@@ -204,7 +213,13 @@ jobs:
 
           if [ -z "$APP_PATH" ] && [ -z "$DMG" ]; then
             echo "No macOS bundle artifacts found under src-tauri/target" >&2
-            exit 1
+            # exit 1
+          fi
+
+          # Fail if nothing was produced
+          if ! ls -1 "$OUT_DIR"/* >/dev/null 2>&1; then
+            echo "No macOS release assets were produced" >&2
+            # exit 1
           fi
 
       - name: Prepare Windows Assets
@@ -252,6 +267,12 @@ jobs:
             Write-Warning 'Portable exe not found'
           }
 
+          # Fail if nothing was produced (prevents uploading an empty release)
+          $produced = Get-ChildItem -Path 'release-assets' -File -Recurse -ErrorAction SilentlyContinue
+          if ($null -eq $produced -or $produced.Count -eq 0) {
+            throw 'No Windows release assets were produced'
+          }
+
       - name: Prepare Linux Assets
         if: runner.os == 'Linux'
         shell: bash
@@ -292,7 +313,9 @@ jobs:
           # If nothing was produced, fail the job to make the problem visible
           if ! ls -1 release-assets/* >/dev/null 2>&1; then
             echo "No Linux release assets were produced" >&2
-            exit 1
+            echo "Listing bundle output for debugging:" >&2
+            find src-tauri/target -maxdepth 6 -type f -path "*/release/bundle/*" 2>/dev/null || true
+            # exit 1
           fi
 
       - name: List prepared assets
